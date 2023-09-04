@@ -1,0 +1,34 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Answers {
+  answer_id      Int        @id @default(autoincrement())
+  answer         String     @db.VarChar
+  its_correct    Boolean    @default(false)
+  question_id_fk Int?
+  Questions      Questions? @relation(fields: [question_id_fk], references: [question_id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model Questions {
+  question_id    Int           @id @default(autoincrement())
+  quest          String        @db.VarChar
+  case_sensitive Boolean       @default(false)
+  exact_match    Boolean       @default(false)
+  Answers        Answers[]
+  User_Answer    User_Answer[]
+}
+
+model User_Answer {
+  user_answer_id Int        @id @default(autoincrement())
+  anser          String     @db.VarChar
+  its_correct    Boolean    @default(false)
+  question_id_fk Int?
+  intento        Int
+  Questions      Questions? @relation(fields: [question_id_fk], references: [question_id], onDelete: NoAction, onUpdate: NoAction)
+}
