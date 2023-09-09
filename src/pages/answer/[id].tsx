@@ -1,4 +1,4 @@
-import { ssApi } from "@/api";
+import { ssApi, ssPythonApi } from "@/api";
 import { LayoutPage } from "@/components/Layout";
 import { getAnswers } from "@/db/dbAnswer";
 import { getQuestion } from "@/db/dbQuestion";
@@ -24,80 +24,34 @@ const AnswerPage: NextPage<Props> = ({
 	const [answer, setAnswer] = useState("");
 	const route = useRouter();
 
-	const notCorrect = async () => {
-		console.log("paso 0");
+	const handleAnswer = async () => {
+		const tree = await ssPythonApi({
+			method: "POST",
+			url: "/spacy",
+			data: {
+				case_sensitive,
+				test,
+				exact_match,
+				answer,
+			},
+		});
 		await ssApi({
 			method: "POST",
 			url: "/answer",
 			data: {
 				question_id,
 				answer,
-				its_correct: false,
+				its_correct: tree["data"]["its_correct"],
 			},
 		});
-
-		return alert("Lo siento respuesta incorrecta :(");
-	};
-
-	const exactAndSensitive = async () => {
-		const index = answer.indexOf(answer);
-		if (test[index] === answer) {
-			const res = await ssApi({
-				method: "POST",
-				url: "/answer",
-				data: {
-					question_id,
-					answer,
-					its_correct: true,
-				},
-			});
+		if (tree["data"]["its_correct"]) {
 			alert("Respuesta Correcta!!");
 			route.replace("/");
 			return;
 		}
-		notCorrect();
-		return;
-	};
+		alert("Respuesta Incorrecta!!");
+		route.replace("/");
 
-	const exact = async () => {
-		const index = answer.indexOf(answer);
-		if (test[index].toLocaleLowerCase() === answer.toLocaleLowerCase()) {
-			console.log("HOLA");
-			const res = await ssApi({
-				method: "POST",
-				url: "/answer",
-				data: {
-					question_id,
-					answer,
-					its_correct: true,
-				},
-			});
-			alert("Respuesta Correcta!!");
-			route.replace("/");
-			return;
-		}
-		notCorrect();
-		return;
-	};
-
-	const handleAnswer = async () => {
-		if (case_sensitive === true && exact_match === true) {
-			exactAndSensitive();
-			return;
-		}
-
-		if (case_sensitive === true) {
-			exactAndSensitive();
-			return;
-		}
-
-		if (exact_match === true) {
-			exact();
-			return;
-		}
-
-		console.log("paso 0");
-		notCorrect();
 		return;
 	};
 

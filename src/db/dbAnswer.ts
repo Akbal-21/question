@@ -11,10 +11,8 @@ export const getAllAnswers = async () => {
 export const getAnswers = async (id: number) => {
 	await prisma.$connect();
 	const answer = await prisma.answers.findMany({
-		where: { question_id_fk: id },
+		where: { question_id_fk: id, its_correct: true },
 	});
 	await prisma.$disconnect();
-
-	console.log(answer);
 	return answer;
 };
