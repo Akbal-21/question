@@ -7,7 +7,7 @@ const conf = {
 			themeName: "dark",
 			colorScheme: "dark",
 			colors: {
-				backgroundPrimary: "#1e293b",
+				backgroundPrimary: "#7589aa",
 			},
 		},
 	],

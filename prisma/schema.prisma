@@ -7,28 +7,17 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Answers {
-  answer_id      Int        @id @default(autoincrement())
-  answer         String     @db.VarChar
-  its_correct    Boolean    @default(false)
-  question_id_fk Int?
-  Questions      Questions? @relation(fields: [question_id_fk], references: [question_id], onDelete: NoAction, onUpdate: NoAction)
+model quest {
+  id                String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name_quest        String       @db.VarChar
+  quest             String?
+  quest_information String?
+  Respuestas        Respuestas[]
 }
 
-model Questions {
-  question_id    Int           @id @default(autoincrement())
-  quest          String        @db.VarChar
-  case_sensitive Boolean       @default(false)
-  exact_match    Boolean       @default(false)
-  Answers        Answers[]
-  User_Answer    User_Answer[]
-}
-
-model User_Answer {
-  user_answer_id Int        @id @default(autoincrement())
-  anser          String     @db.VarChar
-  its_correct    Boolean    @default(false)
-  question_id_fk Int?
-  intento        Int
-  Questions      Questions? @relation(fields: [question_id_fk], references: [question_id], onDelete: NoAction, onUpdate: NoAction)
+model Respuestas {
+  id          String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  Respuesta   String
+  Id_Pregunta String? @db.Uuid
+  quest       quest?  @relation(fields: [Id_Pregunta], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }

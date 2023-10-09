@@ -1,51 +1,52 @@
-import { prisma } from "@/db";
-import { IAnswer, IQuestion } from "@/interface";
+import { PrismaClient } from "@prisma/client";
+// Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from "next";
 
-type Data = {
-	message: string;
-};
+type Data =
+  | {
+      message: string;
+    }
+  | {
+      form: {
+        id: string;
+        name_quest: string;
+        quest: string | null;
+        quest_information: string | null;
+      };
+    };
 
 export default function handler(
-	req: NextApiRequest,
-	res: NextApiResponse<Data>,
+  req: NextApiRequest,
+  res: NextApiResponse<Data>,
 ) {
-	switch (req.method) {
-		case "POST":
-			return addQuest(req, res);
+  switch (req.method) {
+    case "POST":
+      return insertQuestion(req, res);
 
-		default:
-			return res.status(404).json({ message: "Bad Request" });
-	}
+    default:
+      return res.status(405).end();
+  }
 }
+async function insertQuestion(req: NextApiRequest, res: NextApiResponse<Data>) {
+  const { nameQuestion, quest, questInformation } = req.body as {
+    nameQuestion: string;
+    quest: string;
+    questInformation: string;
+  };
+  console.log({ nameQuestion, quest, questInformation });
 
-async function addQuest(req: NextApiRequest, res: NextApiResponse) {
-	const { question, anss } = req.body;
+  const prisma = new PrismaClient();
 
-	// rome-ignore lint/style/useConst: <explanation>
-	let pregunta: IQuestion;
-	const respuesta: IAnswer[] = [];
-	await prisma.$connect();
-	pregunta = await prisma.questions.create({
-		data: question,
-	});
-	const { question_id } = pregunta;
+  await prisma.$connect();
 
-	for (const key in anss) {
-		const { answer, its_correct }: IAnswer = anss[key];
-		const result = await prisma.answers.create({
-			data: {
-				answer,
-				its_correct,
-				question_id_fk: question_id,
-			},
-		});
-		console.log(result);
+  const form = await prisma.quest.create({
+    data: {
+      name_quest: nameQuestion,
+      quest,
+      quest_information: questInformation,
+    },
+  });
 
-		respuesta.push(result);
-	}
-
-	await prisma.$disconnect();
-
-	return res.status(200).json({ pregunta, respuesta });
+  await prisma.$disconnect();
+  return res.status(200).json({ form });
 }
